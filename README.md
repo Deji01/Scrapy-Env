@@ -9,3 +9,8 @@ cd template
 
 scrapy genspider example example.com
 ```
+
+### Environments
+
+* ~/.venv
+* ~/.b2b
