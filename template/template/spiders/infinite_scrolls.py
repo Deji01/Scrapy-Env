@@ -1,17 +1,24 @@
+# spiders/quotes.py
+
 import scrapy
 from template.items import QuoteItem
-
+from scrapy_playwright.page import PageMethod
 
 class QuotesSpider(scrapy.Spider):
-    name = 'quotes_page_error'
+    name = 'quotes_scroll'
 
     def start_requests(self):
-        url = 'https://quotes.toscrape.com/js/'
+        url = "https://quotes.toscrape.com/scroll"
         yield scrapy.Request(url, meta=dict(
-            playwright = True,
-            playwright_include_page = True, 
-            errback=self.errback,
-        ))
+                playwright = True,
+                playwright_include_page = True, 
+                playwright_page_methods =[
+          PageMethod("wait_for_selector", "div.quote"),
+          PageMethod("evaluate", "window.scrollBy(0, document.body.scrollHeight)"),
+          PageMethod("wait_for_selector", "div.quote:nth-child(11)"),  # 10 per page
+          ],
+        errback=self.errback,
+            ))
 
     async def parse(self, response):
         page = response.meta["playwright_page"]
@@ -27,4 +34,4 @@ class QuotesSpider(scrapy.Spider):
     async def errback(self, failure):
         page = failure.request.meta["playwright_page"]
         await page.close()
- 
+
