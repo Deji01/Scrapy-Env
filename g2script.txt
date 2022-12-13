@@ -1,0 +1,39 @@
+function downloadCSV(csv, filename) {
+    var csvFile;
+    var downloadLink;
+  
+    csvFile = new Blob([csv], {
+      type: "text/csv"
+    });
+  
+    downloadLink = document.createElement("a");
+    downloadLink.download = filename;
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+  
+    downloadLink.style.display = "none";
+  
+    document.body.appendChild(downloadLink);
+  
+    downloadLink.click();
+  }
+
+function downloadCompanies() {
+    function escapeStr(str) {
+        return str ? '"' + str.replace(/"/g,'""') + '"' : ''
+    }
+    const companies = []
+    document.querySelectorAll('div.segmented-shadow-card__segment').forEach(company => {
+        const name = company.querySelector("div[itemprop='name']")
+        const description = company.querySelector('span.product-listing__paragraph')
+        const url = company.querySelector('a.d-ib')
+        companies.push([
+          escapeStr(name.textContent), 
+          escapeStr(description && description.textContent + description.attributes['data-truncate-revealer-overflow-text'].value),
+          escapeStr(url && url.href)
+        ])
+    })
+    let csvContent = companies.map(row => row.join(",")).join("\n");
+    downloadCSV(csvContent, 'companies.csv')
+}
+
+downloadCompanies()
